@@ -3,5 +3,5 @@ __pycache__/
 
 # Ignore Certain Directories
 # data/**
-db/**
+!db/**
 !models/**

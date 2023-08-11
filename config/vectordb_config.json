@@ -1,0 +1,1 @@
+{"emb_model_name": "hiiamsid/sentence_similarity_spanish_es", "device": "cuda", "chunk_size": 750, "chunk_overlap": 50, "k": 2}

@@ -1,0 +1,7 @@
+# Ignore pycache files
+__pycache__/
+
+# Ignore Certain Directories
+# data/**
+db/**
+models/**

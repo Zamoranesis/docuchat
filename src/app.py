@@ -70,58 +70,109 @@ def render_first(file):
         return image
 
 
+def save_model_config():
+    model_config = {
+                    "n_ctx": int(n_ctx_input.get()),
+                    "n_batch": int(n_batch_input.get()),
+                    "n_gpu_layers": int(n_gpu_layers_input.get()),
+                    "max_tokens": int(max_tokens_input.get()),
+                    "temperature": float(temperature_input.get()),
+                    "top_p": float(top_p_input.get()),
+                    "repeat_penalty": float(repeat_penalty_input.get()),
+                    }
+    with open("../config/model_config.json", "w") as file:
+        json.dump(model_config, file)
+
+def save_vector_config():
+    vectordb_config = {
+                    "chunk_size": int(chunk_size_input.get()),
+                    "chunk_overlap": int(chunk_overlap_input.get()),
+                    "k": int(k_input.get())
+                    }
+    with open("../config/vectordb_config.json", "w") as file:
+        json.dump(vectordb_config, file)
+
 
 # ============= Build Chat Interface =============
 
 with gr.Blocks() as demo:
 
-    # ============= Create a Gradio block =============
-    with gr.Column():
-        with gr.Row():
-            chatbot = gr.Chatbot(value=[],
-                                 elem_id='chatbot'
-                                 ).style(height=650)
-            show_img = gr.Image(label='Upload File',
-                                tool='select'
-                                ).style(height=680)
+    with gr.Tabs():
+        
+        # Pestaña de Chat
+        with gr.Tab("Chat"):
+            # Bloque de chatbot y imagen
+            with gr.Column():
+                with gr.Row():
+                    chatbot = gr.Chatbot(value=[],
+                                        elem_id='chatbot',
+                                        height=650
+                                        )
+                    show_img = gr.Image(label='Upload File',
+                                        tool='select',
+                                        height=680
+                                        )
 
-    with gr.Row():
-        with gr.Column(scale=0.70):
-            txt = gr.Textbox(
-                            show_label=False,
-                            placeholder="Enter text and press enter"
-            ).style(container=False)
+            with gr.Row():
+                with gr.Column(scale=0.70):
+                    txt = gr.Textbox(
+                                    show_label=False,
+                                    placeholder="Enter text and press enter",
+                                    container=False
+                                    )
 
-        with gr.Column(scale=0.15):
-            submit_btn = gr.Button('Submit')
+                with gr.Column(scale=0.15):
+                    submit_btn = gr.Button('Submit')
 
-        with gr.Column(scale=0.15):
-            btn = gr.UploadButton("📁 Upload a file",
-                                   file_types=[app.loader_map.keys()]
-                                  ).style()
+                with gr.Column(scale=0.15):
+                    btn = gr.UploadButton("📁 Upload a file",
+                                        file_types=[app.loader_map.keys()]
+                                        )
+            # Event handler for uploading a PDF
+            btn.upload(fn=render_first,
+                    inputs=[btn],
+                    outputs=[show_img]
+                    )
+            # Event handler for submitting text and generating response
+            submit_btn.click(
+                fn=add_text,
+                inputs=[chatbot, txt],
+                outputs=[chatbot],
+                queue=False
+            ).success(
+                fn=get_response,
+                inputs=[chatbot, txt, btn],
+                outputs=[chatbot, txt]
+            ).success(
+                fn=render_file,
+                inputs=[btn],
+                outputs=[show_img]
+            )
 
-    # ============= Set up event handlers =============
 
-    # Event handler for uploading a PDF
-    btn.upload(fn=render_first,
-               inputs=[btn],
-               outputs=[show_img]
-               )
-    # Event handler for submitting text and generating response
-    submit_btn.click(
-        fn=add_text,
-        inputs=[chatbot, txt],
-        outputs=[chatbot],
-        queue=False
-    ).success(
-        fn=get_response,
-        inputs=[chatbot, txt, btn],
-        outputs=[chatbot, txt]
-    ).success(
-        fn=render_file,
-        inputs=[btn],
-        outputs=[show_img]
-    )
+        # Pestaña de Configuración
+        with gr.Tab("Configuration"):
+            with gr.Column():
+                with gr.Row():
+                    n_ctx_input = gr.Number(value=1028, label="N CTX", interactive=True)
+                    n_batch_input = gr.Number(value=512, label="N Batch", interactive=True)
+                    n_gpu_layers_input = gr.Number(value=128, label="N GPU Layers", interactive=True)
+                    max_tokens_input = gr.Number(value=512, label="Max Tokens", interactive=True)
+                    temperature_input = gr.Slider(value=0.1, minimum=0 , maximum= 1, label="Temperature", interactive=True)
+                    top_p_input = gr.Slider(value=0.75, minimum=0 , maximum= 1, label="Top P", interactive=True)
+                    repeat_penalty_input = gr.Slider(value=1.1, minimum=0 , maximum= 2, label="Repeat Penalty", interactive=True)
+                    save_model_config_btn = gr.Button("Save Model Config")
+
+            # Configuración de vectordb_config.json
+            with gr.Column():
+                with gr.Row():
+                    chunk_size_input = gr.Number(value=750, label="Chunk Size", interactive=True)
+                    chunk_overlap_input = gr.Number(value=50, label="Chunk Overlap", interactive=True)
+                    k_input = gr.Number(value=2, label="K", interactive=True)
+                    save_vector_config_btn = gr.Button("Save VectorDB Config")
+            # Event handle for model and vectorDB config
+            save_model_config_btn.click(fn=save_model_config)
+            save_vector_config_btn.click(fn=save_vector_config)
 
 
 demo.queue()

@@ -72,22 +72,22 @@ def render_first(file):
 
 def save_model_config():
     model_config = {
-                    "n_ctx": int(n_ctx_input.get()),
-                    "n_batch": int(n_batch_input.get()),
-                    "n_gpu_layers": int(n_gpu_layers_input.get()),
-                    "max_tokens": int(max_tokens_input.get()),
-                    "temperature": float(temperature_input.get()),
-                    "top_p": float(top_p_input.get()),
-                    "repeat_penalty": float(repeat_penalty_input.get()),
+                    "n_ctx": int(n_ctx_input.value),
+                    "n_batch": int(n_batch_input.value),
+                    "n_gpu_layers": int(n_gpu_layers_input.value),
+                    "max_tokens": int(max_tokens_input.value),
+                    "temperature": float(temperature_input.value),
+                    "top_p": float(top_p_input.value),
+                    "repeat_penalty": float(repeat_penalty_input.value),
                     }
     with open("../config/model_config.json", "w") as file:
         json.dump(model_config, file)
 
 def save_vector_config():
     vectordb_config = {
-                    "chunk_size": int(chunk_size_input.get()),
-                    "chunk_overlap": int(chunk_overlap_input.get()),
-                    "k": int(k_input.get())
+                    "chunk_size": int(chunk_size_input.value),
+                    "chunk_overlap": int(chunk_overlap_input.value),
+                    "k": int(k_input.value)
                     }
     with open("../config/vectordb_config.json", "w") as file:
         json.dump(vectordb_config, file)

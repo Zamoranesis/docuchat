@@ -8,6 +8,7 @@ import gradio as gr
 import fitz
 from PIL import Image
 from utils import DocumentChatApp
+import json
                   
 
 # ============= Initialize LLM App =============

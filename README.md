@@ -10,6 +10,3 @@ Langchain + Gradio powered app in order to chat with your own files in Google Dr
 3. At the end of the notebook it will appear a public URL--> Open it and start chatting with your file!
 4. Don´t forget to give a star to this repo!
 
-
-Model and vectorstore settings can be customized under `/config` folder
-

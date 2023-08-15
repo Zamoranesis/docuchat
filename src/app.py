@@ -14,17 +14,19 @@ import json
 # ============= Initialize LLM App =============
 
 app = DocumentChatApp()
+app.model_config
 
+# %%
 
 # ============= Auxiliary functions =============
 
 
 def add_text(history, text: str):
-    if not text:
-         raise gr.Error('enter text')
-    history = history + [(text,'')] 
+        if not text:
+            raise gr.Error('enter text')
+        history = history + [(text,'')] 
 
-    return history
+        return history
 
 
 def get_response(history,
@@ -71,27 +73,37 @@ def render_first(file):
         return image
 
 
-def save_model_config():
-    model_config = {
-                    "n_ctx": int(n_ctx_input.value),
-                    "n_batch": int(n_batch_input.value),
-                    "n_gpu_layers": int(n_gpu_layers_input.value),
-                    "max_tokens": int(max_tokens_input.value),
-                    "temperature": float(temperature_input.value),
-                    "top_p": float(top_p_input.value),
-                    "repeat_penalty": float(repeat_penalty_input.value),
-                    }
-    with open("../config/model_config.json", "w") as file:
-        json.dump(model_config, file)
+def overwrite_model_config( n_ctx_input,
+                            n_batch_input,
+                            n_gpu_layers_input,
+                            max_tokens_input,
+                            temperature_input,
+                            top_p_input,
+                            repeat_penalty_input
+                            ):
 
-def save_vector_config():
-    vectordb_config = {
-                    "chunk_size": int(chunk_size_input.value),
-                    "chunk_overlap": int(chunk_overlap_input.value),
-                    "k": int(k_input.value)
-                    }
-    with open("../config/vectordb_config.json", "w") as file:
-        json.dump(vectordb_config, file)
+        print(f"Previous model config:\n{app.model_config}")
+        # Overwrite model config
+        app.model_config["n_ctx"] = int(n_ctx_input)
+        app.model_config["n_batch"] = int(n_batch_input)
+        app.model_config["n_gpu_layers"] = int(n_gpu_layers_input)
+        app.model_config["max_tokens"] = int(max_tokens_input)
+        app.model_config["temperature"] = float(temperature_input)
+        app.model_config["top_p"] = float(top_p_input)
+        app.model_config["repeat_penalty"] = float(repeat_penalty_input)
+        print(f"New model config:\n{app.model_config}")
+
+
+def overwrite_vectordb_config(chunk_size_input,
+                              chunk_overlap_input,
+                              k_input
+                             ):
+        print(f"Previous vectordb config:\n{app.vectordb_config}")
+        # Overwrite model config
+        app.vectordb_config["chunk_size"] = int(chunk_size_input)
+        app.vectordb_config["chunk_overlap"] = int(chunk_overlap_input)
+        app.vectordb_config["k"] = int(k_input)
+        print(f"New vectordb config:\n{app.vectordb_config}")
 
 
 # ============= Build Chat Interface =============
@@ -155,25 +167,40 @@ with gr.Blocks() as demo:
         with gr.Tab("Configuration"):
             with gr.Column():
                 with gr.Row():
-                    n_ctx_input = gr.Number(value=1028, label="N CTX", interactive=True)
-                    n_batch_input = gr.Number(value=512, label="N Batch", interactive=True)
-                    n_gpu_layers_input = gr.Number(value=128, label="N GPU Layers", interactive=True)
-                    max_tokens_input = gr.Number(value=512, label="Max Tokens", interactive=True)
-                    temperature_input = gr.Slider(value=0.1, minimum=0 , maximum= 1, label="Temperature", interactive=True)
-                    top_p_input = gr.Slider(value=0.75, minimum=0 , maximum= 1, label="Top P", interactive=True)
-                    repeat_penalty_input = gr.Slider(value=1.1, minimum=0 , maximum= 2, label="Repeat Penalty", interactive=True)
+                    n_ctx_input = gr.Number(value=1028, label="N CTX")
+                    n_batch_input = gr.Number(value=512, label="N Batch")
+                    n_gpu_layers_input = gr.Number(value=128, label="N GPU Layers")
+                    max_tokens_input = gr.Number(value=512, label="Max Tokens")
+                    temperature_input = gr.Slider(value=0.1, minimum=0 , maximum= 1, label="Temperature")
+                    top_p_input = gr.Slider(value=0.75, minimum=0 , maximum= 1, label="Top P")
+                    repeat_penalty_input = gr.Slider(value=1.1, minimum=0 , maximum= 2, label="Repeat Penalty")
                     save_model_config_btn = gr.Button("Save Model Config")
+                    save_model_config_btn.click(fn=overwrite_model_config,
+                                                inputs=[
+                                                        n_ctx_input,
+                                                        n_batch_input,
+                                                        n_gpu_layers_input,
+                                                        max_tokens_input,
+                                                        temperature_input,
+                                                        top_p_input,
+                                                        repeat_penalty_input
+                                                        ]
+                                                )
 
             # Configuración de vectordb_config.json
             with gr.Column():
                 with gr.Row():
-                    chunk_size_input = gr.Number(value=750, label="Chunk Size", interactive=True)
-                    chunk_overlap_input = gr.Number(value=50, label="Chunk Overlap", interactive=True)
-                    k_input = gr.Number(value=2, label="K", interactive=True)
+                    chunk_size_input = gr.Number(value=750, label="Chunk Size")
+                    chunk_overlap_input = gr.Number(value=50, label="Chunk Overlap")
+                    k_input = gr.Number(value=2, label="K")
                     save_vector_config_btn = gr.Button("Save VectorDB Config")
-            # Event handle for model and vectorDB config
-            save_model_config_btn.click(fn=save_model_config)
-            save_vector_config_btn.click(fn=save_vector_config)
+                    save_vector_config_btn.click(fn=overwrite_vectordb_config,
+                                                 inputs=[
+                                                         chunk_size_input,
+                                                         chunk_overlap_input,
+                                                         k_input
+                                                        ]
+                                                )
 
 
 demo.queue()

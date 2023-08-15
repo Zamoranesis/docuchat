@@ -1,0 +1,1 @@
+{"model_path": "../models/llama-2-13b-chat.ggmlv3.q5_1.bin", "n_ctx": 1028, "n_batch": 512, "n_gpu_layers": 128, "max_tokens": 512, "temperature": 0.1, "top_p": 0.75, "repeat_penalty": 1.1, "verbose": false}
